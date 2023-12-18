@@ -1,8 +1,11 @@
 package com.example.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.entity.*;
@@ -41,32 +44,55 @@ public class SocialMediaController {
     }
 
     @PostMapping("/messages")
-    public Message postMessage(@RequestBody Message msg) {
-        return null;
+    public ResponseEntity<?> postMessage(@RequestBody Message msg) {
+        Account optAccount = accountService.getAccountById(msg.getPosted_by());
+        if (optAccount == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
+        Message resMsg = messageService.storeMessage(msg);
+        if(resMsg == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST); 
+        } 
+        else
+        {
+            return new ResponseEntity<>(resMsg, HttpStatus.OK);
+        }
     }
 
     @GetMapping("/messages")
     public List<Message> getMessages() {
-        return null;
+        return messageService.getMessages();
     }
 
     @GetMapping("/messages/{id}")
     public Message getMessage(@PathVariable int id) {
-        return null;
+        return messageService.getMessageById(id);
     }
 
     @DeleteMapping("/messages/{id}")
-    public Message deleteMessage(@PathVariable int id) {
-        return null;
+    public ResponseEntity<?> deleteMessage(@PathVariable int id) {
+        // Weird work around. I wanted to return 1 or 0, i.e., the number of found messages
+        // But test requires empty body if 0
+        return new ResponseEntity<>(messageService.deleteMessage(id) == 1 ? 1 : null, HttpStatus.OK);
     }
 
     @PatchMapping("/messages/{id}")
-    public Message updateMessage(@PathVariable int id, @RequestBody Message msg) {
-        return null;
+    public ResponseEntity<?> updateMessage(@PathVariable int id, @RequestBody Message msg) {
+        Message resultMessage = messageService.updateMessage(id, msg);
+        if (resultMessage == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(1, HttpStatus.OK);
     }
 
     @GetMapping("/accounts/{id}/messages")
     public List<Message> getAccountMessages(@PathVariable int id) {
-        return null;
+        Account account = accountService.getAccountById(id);
+        if (account == null) {
+            return null;
+        }
+
+        return messageService.getMessageByPostedBy(id);
     }
 }
