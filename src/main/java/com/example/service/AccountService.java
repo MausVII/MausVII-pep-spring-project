@@ -61,11 +61,12 @@ public class AccountService {
      * @return account related to id
      */
     public Account login(Account account) {
-
-        Optional<Account> optAccount = accountRepository.findById(9999);
-        if (optAccount.isPresent())
+        // Optional<Account> optAccount = accountRepository.findById(account.getAccount_id());
+        Account foundAccount = accountRepository.findAccountByUsername(account.getUsername());
+        
+        if (foundAccount != null)
         {
-            Account foundAccount = optAccount.get();
+            // Account foundAccount = optAccount.get();
             if (foundAccount.getUsername().compareTo(account.getUsername()) == 0 && foundAccount.getPassword().compareTo(account.getPassword()) == 0)
             {
                 return foundAccount;
