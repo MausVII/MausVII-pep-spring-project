@@ -26,20 +26,32 @@ public class SocialMediaController {
     MessageService messageService;
 
     @PostMapping("/register")
-    public Account postAccount(@RequestBody Account account) {
-        return null;
-    }
-
-    @PostMapping("/login")
-    public Account Login(@RequestBody Account account) {
-        Account foundAccount = accountService.login(account.getAccount_id(), account.getPassword());
-        if (foundAccount != null)
-        {
-            return foundAccount;
+    public ResponseEntity<?> postAccount(@RequestBody Account account) {
+        System.out.println(account.toString());
+        Account registeredAccount = accountService.register(account);
+        if (registeredAccount == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        else if (registeredAccount.getAccount_id() == null) {
+            return new ResponseEntity<>(null, null, HttpStatus.CONFLICT);
         }
         else
         {
-            return null;
+            return new ResponseEntity<>(registeredAccount, null, HttpStatus.OK);
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> Login(@RequestBody Account account) {
+        System.out.println(account.toString());
+        Account foundAccount = accountService.login(account);
+        if (foundAccount != null)
+        {
+            return new ResponseEntity<>(foundAccount, HttpStatus.OK);
+        }
+        else
+        {
+            return new ResponseEntity<>(null, null, HttpStatus.UNAUTHORIZED);
         }
     }
 

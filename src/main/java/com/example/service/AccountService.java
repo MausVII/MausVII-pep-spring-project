@@ -38,18 +38,37 @@ public class AccountService {
     }
 
     /**
-     * @param id
-     * @param password
+     * @param account
+     * @return
+     */
+    public Account register(Account account) {
+        if (account.getUsername() == "" || account.getPassword().length() < 4) return null;
+
+        Account existsAccount = accountRepository.findAccountByUsername(account.getUsername());
+        if (existsAccount == null) {
+            accountRepository.save(account);
+            Account retAccount = getAccountById(account.getAccount_id());
+            return retAccount;
+        }
+        else {
+            // return account with null id so controller can send correct http code
+            return account;
+        }
+    }
+
+    /**
+     * @param account
      * @return account related to id
      */
-    public Account login(int id, String password) {
-        Optional<Account> optAccount = accountRepository.findById(id);
+    public Account login(Account account) {
+
+        Optional<Account> optAccount = accountRepository.findById(9999);
         if (optAccount.isPresent())
         {
-            Account account = optAccount.get();
-            if (account.getPassword() == password)
+            Account foundAccount = optAccount.get();
+            if (foundAccount.getUsername().compareTo(account.getUsername()) == 0 && foundAccount.getPassword().compareTo(account.getPassword()) == 0)
             {
-                return account;
+                return foundAccount;
             }
             else
             {
